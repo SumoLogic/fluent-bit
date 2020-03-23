@@ -236,6 +236,12 @@ static int process_content(struct flb_tail_file *file, off_t *bytes)
     msgpack_sbuffer *out_sbuf;
     msgpack_packer *out_pck;
     struct flb_tail_config *ctx = file->config;
+    /*
+     * Keeps length of previous lines which should be concatenated 
+     * with current one before processing.
+     * This variable applies only to docker_mode with docker_mode_json
+     */
+    int backward_len = 0;
 
     /* Create a temporal msgpack buffer */
     msgpack_sbuffer_init(&mp_sbuf);
@@ -259,6 +265,9 @@ static int process_content(struct flb_tail_file *file, off_t *bytes)
         /* Empty line (just \n) */
         if (len == 0) {
             data++;
+            if (ctx->docker_mode_json && backward_len > 0) {
+              backward_len ++;
+            }
             processed_bytes++;
             continue;
         }
@@ -267,6 +276,9 @@ static int process_content(struct flb_tail_file *file, off_t *bytes)
         crlf = (data[len-1] == '\r');
         if (len == 1 && crlf) {
             data += 2;
+            if (ctx->docker_mode_json && backward_len > 0) {
+              backward_len += 2;
+            }
             processed_bytes += 2;
             continue;
         }
@@ -274,8 +286,8 @@ static int process_content(struct flb_tail_file *file, off_t *bytes)
         /* Reset time for each line */
         flb_time_zero(&out_time);
 
-        line = data;
-        line_len = len - crlf;
+        line = data - backward_len;
+        line_len = len - crlf + backward_len;
         repl_line = NULL;
 
         if (ctx->docker_mode) {
@@ -283,6 +295,8 @@ static int process_content(struct flb_tail_file *file, off_t *bytes)
                                                  &repl_line, &repl_line_len,
                                                  file, ctx);
             if (ret >= 0) {
+                /* Line is valid json */
+                backward_len = 0;
                 if (repl_line == line) {
                     repl_line = NULL;
                 }
@@ -294,9 +308,21 @@ static int process_content(struct flb_tail_file *file, off_t *bytes)
                     goto go_next;
                 }
             }
+            /*
+             * Json parsing was incorrect, so this line should be concatenated
+             * with the next one and then processed together.
+             * Length additionally should be increased by one,
+             * because of newline character between lines.
+             */
+            else if (ctx->docker_mode_json && ret == -2) {
+                /* Need to go back `line_len + 1` in next iteration */
+                backward_len = line_len + 1;
+                goto go_next;
+            }
             else {
                 flb_tail_dmode_flush(out_sbuf, out_pck, file, ctx);
             }
+
         }
 
 #ifdef FLB_HAVE_PARSER

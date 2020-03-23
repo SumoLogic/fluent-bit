@@ -78,9 +78,10 @@ static int modify_json_cond(char *js, size_t js_len,
         goto modify_json_cond_end;
     }
 
+    /* Parse line and returns -2 if string wasn't a valid json */
     ret = flb_json_tokenise(js, js_len, &state);
     if (ret != 0 || state.tokens_count == 0) {
-        ret = -1;
+        ret = -2;
         goto modify_json_cond_end;
     }
 

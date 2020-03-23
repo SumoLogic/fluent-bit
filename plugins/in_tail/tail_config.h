@@ -98,6 +98,7 @@ struct flb_tail_config {
     /* Docker mode */
     int docker_mode;           /* Docker mode enabled ?  */
     int docker_mode_flush;     /* Docker mode flush/wait */
+    int docker_mode_json;
 
     /* Lists head for files consumed statically (read) and by events (inotify) */
     struct mk_list files_static;

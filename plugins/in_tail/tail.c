@@ -410,6 +410,12 @@ static struct flb_config_map config_map[] = {
 
     },
     {
+     FLB_CONFIG_MAP_BOOL, "docker_mode_json", false,
+     0, FLB_TRUE, offsetof(struct flb_tail_config, docker_mode_json),
+     "Treat Docker logs as JSON to support multiline logs"
+
+    },
+    {
      FLB_CONFIG_MAP_BOOL, "path_key", NULL,
      0, FLB_TRUE, offsetof(struct flb_tail_config, docker_mode),
      "set the 'key' name where the name of monitored file will be appended."
