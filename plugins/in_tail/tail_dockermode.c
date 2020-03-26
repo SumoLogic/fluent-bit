@@ -263,11 +263,6 @@ int flb_tail_dmode_process_content(time_t now,
                 flb_tail_dmode_flush(mp_sbuf, mp_pck, file, ctx);
             }
         }
-        else {
-            flb_tail_dmode_flush(mp_sbuf, mp_pck, file, ctx);
-        }
-#else
-        flb_tail_dmode_flush(mp_sbuf, mp_pck, file, ctx);
 #endif
     }
 
@@ -295,6 +290,13 @@ int flb_tail_dmode_process_content(time_t now,
         else {
             /* Line ended with newline */
             file->dmode_complete = true;
+#ifdef FLB_HAVE_REGEX
+            if (!ctx->docker_mode_parser) {
+                flb_tail_dmode_flush(mp_sbuf, mp_pck, file, ctx);
+            }
+#else
+            flb_tail_dmode_flush(mp_sbuf, mp_pck, file, ctx);
+#endif
         }
     }
     return ret;
