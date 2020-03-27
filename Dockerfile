@@ -1,4 +1,4 @@
-FROM debian:buster as builder
+FROM amd64/debian:buster-slim as builder
 
 # Fluent Bit version
 ENV FLB_MAJOR 1
@@ -31,7 +31,7 @@ COPY . /tmp/src/
 RUN rm -rf /tmp/src/build/*
 
 WORKDIR /tmp/src/build/
-RUN cmake -DFLB_DEBUG=Off \
+RUN cmake -DFLB_DEBUG=On \
           -DFLB_TRACE=Off \
           -DFLB_JEMALLOC=On \
           -DFLB_TLS=On \
@@ -40,7 +40,7 @@ RUN cmake -DFLB_DEBUG=Off \
           -DFLB_HTTP_SERVER=On \
           -DFLB_IN_SYSTEMD=On \
           -DFLB_OUT_KAFKA=On \
-          -DFLB_OUT_PGSQL=On ../
+          -DFLB_OUT_PGSQL=On ..
 
 RUN make -j $(getconf _NPROCESSORS_ONLN)
 RUN install bin/fluent-bit /fluent-bit/bin/
@@ -56,8 +56,8 @@ COPY conf/fluent-bit.conf \
      conf/plugins.conf \
      /fluent-bit/etc/
 
-FROM gcr.io/distroless/cc-debian10
-LABEL maintainer="Eduardo Silva <eduardo@treasure-data.com>"
+FROM gcr.io/distroless/cc-debian10:fd0d99e8c54d7d7b2f3dd29f5093d030d192cbbc
+MAINTAINER Eduardo Silva <eduardo@treasure-data.com>
 LABEL Description="Fluent Bit docker image" Vendor="Fluent Organization" Version="1.1"
 
 COPY --from=builder /usr/lib/x86_64-linux-gnu/*sasl* /usr/lib/x86_64-linux-gnu/
