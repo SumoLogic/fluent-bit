@@ -1,4 +1,4 @@
-FROM debian:stretch as builder
+FROM amd64/debian:stretch-slim as builder
 
 # Fluent Bit version
 ENV FLB_MAJOR 1
@@ -15,11 +15,13 @@ RUN apt-get update && \
       make \
       wget \
       unzip \
-      libssl1.0-dev \
+      libssl-dev \
+      libasl-dev \
       libsasl2-dev \
       pkg-config \
       libsystemd-dev \
       zlib1g-dev \
+      ca-certificates \
       flex \
       bison
 
@@ -28,10 +30,9 @@ COPY . /tmp/src/
 RUN rm -rf /tmp/src/build/*
 
 WORKDIR /tmp/src/build/
-RUN cmake -DFLB_DEBUG=Off \
+RUN cmake -DFLB_DEBUG=On \
           -DFLB_TRACE=Off \
           -DFLB_JEMALLOC=On \
-          -DFLB_BUFFERING=On \
           -DFLB_TLS=On \
           -DFLB_SHARED_LIB=Off \
           -DFLB_EXAMPLES=Off \
