@@ -254,6 +254,7 @@ int flb_tail_dmode_process_content(time_t now,
         if (ctx->docker_mode_parser) {
             ret = flb_parser_do(ctx->docker_mode_parser, line, line_len,
                                 &out_buf, &out_size, &out_time);
+            flb_free(out_buf);
 
             /*
             * Buffered log should be flushed out
