@@ -248,6 +248,10 @@ int flb_tail_dmode_process_content(time_t now,
     void *out_buf = NULL;
     size_t out_size;
     struct flb_time out_time = {0};
+    *repl_line = NULL;
+    *repl_line_len = 0;
+    flb_sds_t tmp;
+    flb_sds_t tmp_copy;
 
 #ifdef FLB_HAVE_REGEX
     if (flb_sds_len(file->dmode_lastline) > 0 && file->dmode_complete) {
@@ -267,9 +271,6 @@ int flb_tail_dmode_process_content(time_t now,
     }
 #endif
 
-    *repl_line = NULL;
-    *repl_line_len = 0;
-
     ret = modify_json_cond(line, line_len,
                            &val, &val_len,
                            repl_line, repl_line_len,
@@ -280,8 +281,20 @@ int flb_tail_dmode_process_content(time_t now,
         flb_sds_len_set(file->dmode_lastline, 0);
 
         /* concatenate current log line with buffered one */
-        file->dmode_buf = flb_sds_cat(file->dmode_buf, val, val_len);
-        file->dmode_lastline = flb_sds_copy(file->dmode_lastline, line, line_len);
+        tmp = flb_sds_cat(file->dmode_buf, val, val_len);
+        if (!tmp) {
+            flb_errno();
+            return -1;
+        }
+
+        tmp_copy = flb_sds_copy(file->dmode_lastline, line, line_len);
+        if (!tmp_copy) {
+            flb_errno();
+            return -1;
+        }
+
+        file->dmode_buf = tmp;
+        file->dmode_lastline = tmp_copy;
         file->dmode_flush_timeout = now + (ctx->docker_mode_flush - 1);
 
         if (ret == 0) {
