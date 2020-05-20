@@ -249,8 +249,8 @@ int flb_tail_dmode_process_content(time_t now,
     size_t out_size;
     struct flb_time out_time = {0};
 
-    if (flb_sds_len(file->dmode_lastline) > 0 && file->dmode_complete) {
 #ifdef FLB_HAVE_REGEX
+    if (flb_sds_len(file->dmode_lastline) > 0 && file->dmode_complete) {
         if (ctx->docker_mode_parser) {
             ret = flb_parser_do(ctx->docker_mode_parser, line, line_len,
                                 &out_buf, &out_size, &out_time);
@@ -264,8 +264,8 @@ int flb_tail_dmode_process_content(time_t now,
                 flb_tail_dmode_flush(mp_sbuf, mp_pck, file, ctx);
             }
         }
-#endif
     }
+#endif
 
     *repl_line = NULL;
     *repl_line_len = 0;
