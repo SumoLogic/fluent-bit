@@ -44,13 +44,6 @@ struct tail_file_lines {
 #define MAX_LINES        32
 
 
-static inline int64_t set_result(int64_t v)
-{
-    int64_t old = __sync_lock_test_and_set(&result_time, v);
-    return old;
-}
-
-
 static int file_to_buf(const char *path, char **out_buf, size_t *out_size)
 {
     int ret;
@@ -191,9 +184,6 @@ void do_test(char *system, const char *target, int tExpected, int nExpected, ...
     struct flb_lib_out_cb cb;
     cb.cb   = cb_check_result;
     cb.data = &result;
-
-    /* initialize */
-    set_result(0);
 
     ctx = flb_create();
 
