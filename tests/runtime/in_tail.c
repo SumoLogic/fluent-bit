@@ -113,6 +113,7 @@ static struct tail_file_lines get_out_file_content(const char *target)
     }
 
     lines[line_c++] = out_buf;
+    printf("Out buf: %p\n", out_buf);
     
     for (int i=0; i<out_size; i++) {
       // Nullify \n and \r characters
@@ -171,6 +172,8 @@ exit:
         flb_free(record);
     }
     if (out.lines_c) {
+        printf("Out buf clean 1: %p\n", out.lines);
+        printf("Out buf clean 2: %p\n", out.lines[0]);
         flb_free(out.lines[0]);
     }
     return 0;
