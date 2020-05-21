@@ -266,7 +266,7 @@ void flb_test_in_tail_dockermode_splitted_line()
 
 void flb_test_in_tail_dockermode_multiple_lines()
 {
-    do_test("tail", "dockermode_multiple_lines", 4000, 2,
+    do_test("tail", "dockermode_multiple_lines", 6000, 2,
             "Docker_Mode_Parser", "docker_multiline",
             NULL);
 }
