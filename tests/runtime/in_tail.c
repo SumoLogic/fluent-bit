@@ -170,9 +170,6 @@ exit:
     if (size > 0) {
         flb_free(record);
     }
-    if (out.lines_c) {
-        flb_free(out.lines[0]);
-    }
     return 0;
 }
 
