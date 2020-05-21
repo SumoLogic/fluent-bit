@@ -113,19 +113,25 @@ static struct tail_file_lines get_out_file_content(const char *target)
     }
 
     lines[line_c++] = out_buf;
+    
     for (int i=0; i<out_size; i++) {
       // Nullify \n and \r characters
       p = (char *)(out_buf + i);
       if (*p == '\n' || *p == '\r') {
         *p++ = '\0';
+
+        if (i == out_size - 1){
+          break;
+        }
+
         if (*p != '\n' && *p != '\r' && line_c < MAX_LINES) {
-          lines[line_c++] = out_buf + i + 1;
+          lines[line_c++] = p;
         }
       }
     }
 
     file_lines.lines = lines;
-    file_lines.lines_c = line_c - 1;
+    file_lines.lines_c = line_c;
 
     return file_lines;
 }
